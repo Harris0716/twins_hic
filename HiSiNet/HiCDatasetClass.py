@@ -164,7 +164,8 @@ class SiameseHiCDataset(HiCDataset):
             for pos in range(0, self.chromsizes[chrom], self.split_res)[::-1]:
                 curr_data = []
                 for i in range(0,datasets):
-                    if positions[i][-1:]!=[pos]: continue
+                    if positions[i][-1:]!=[pos]: 
+                        continue
                     curr_data.append(list_of_HiCDatasets[i][starts[i]+len(positions[i])-1] )
                     positions[i].pop()
                 self.append_data(curr_data, pos)
@@ -264,7 +265,8 @@ class PairOfDatasets(SiameseHiCDataset):
         maps_metadata = { i:metadata["class_id"]  for i, metadata in enumerate(self.metadata)}
         all_maps_grouped, rep_pairs, cond_pairs = {}, 0, 0
         for pairs in all_maps.keys():
-            if np.all(np.isnan(all_maps[pairs])): continue
+            if np.all(np.isnan(all_maps[pairs])): 
+                continue
             if maps_metadata[pairs[0]]==maps_metadata[pairs[1]]:
                 rep_pairs +=1
                 if "replicate" in all_maps_grouped: all_maps_grouped["replicate"]+= all_maps[pairs]
@@ -298,13 +300,17 @@ class PairOfDatasets(SiameseHiCDataset):
             for feature_index in np.unique(arr[0])[1:]:
                 indices=np.where(arr[0]==feature_index)
                 x1, x2, y1, y2 = min(indices[0]), max(indices[0]), min(indices[1]), (max(indices[1])
-                if ((x2-x1)<=min_length )|((y2-y1)<=min_width): continue 
-                if ((x2-x1)>=max_length )|((y2-y1)>=max_width): continue  
+                if ((x2-x1)<=min_length )|((y2-y1)<=min_width):
+                    continue 
+                if ((x2-x1)>=max_length )|((y2-y1)>=max_width): 
+                    continue  
                 temp = convex_hull_image(arr[0]==feature_index)
                 temp = temp[x1:x2, y1:y2]
 
-                if (temp.shape[0]<=min_length )|(temp.shape[1]<=min_width): continue
-                if (temp.shape[0]>=max_length )|(temp.shape[1]>=max_width): continue
+                if (temp.shape[0]<=min_length )|(temp.shape[1]<=min_width): 
+                    continue
+                if (temp.shape[0]>=max_length )|(temp.shape[1]>=max_width): 
+                    continue
 
                 original_dims, height= temp.shape, np.min(indices[0])
                 temp = resize(temp, (im_size,im_size),anti_aliasing=False,preserve_range=True)
