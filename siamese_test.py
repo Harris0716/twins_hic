@@ -24,10 +24,8 @@ parser.add_argument("data_inputs", nargs='+',help="keys from dictionary containi
 
 args = parser.parse_args()
 
-
 with open(args.json_file) as json_file:
     dataset = json.load(json_file)
-
 
 
 def test_model(model, dataloader):
@@ -46,7 +44,12 @@ def test_model(model, dataloader):
 
 cuda = torch.device("cuda:0")
 model = eval("models."+ args.model_name)(mask=args.mask).to(cuda)
-model.load_state_dict(torch.load(args.model_infile))
+
+# fix the problem of model. prefix for multi gpu
+state_dict = torch.load(args.model_infile)
+new_state_dict = {k.replace("module.", ""): v for k, v in state_dict.items()}
+model.load_state_dict(new_state_dict)
+
 model.eval()
 
 #dataset all
