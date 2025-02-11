@@ -299,8 +299,8 @@ class PairOfDatasets(SiameseHiCDataset):
         for pos_or_neg, arr in enumerate([arr_pos, arr_neg]):
             for feature_index in np.unique(arr[0])[1:]:
                 indices=np.where(arr[0]==feature_index)
-                x1, x2, y1, y2 = min(indices[0]), max(indices[0]), min(indices[1]), (max(indices[1])
-                if ((x2-x1)<=min_length ) or ((y2-y1)<=min_width):
+                x1, x2, y1, y2 = min(indices[0]), max(indices[0]), min(indices[1]), max(indices[1])
+                if ((x2-x1)<=min_length ) or ((y2-y1)<=min_width): 
                     continue 
                 if ((x2-x1)>=max_length ) or ((y2-y1)>=max_width): 
                     continue  
@@ -314,7 +314,7 @@ class PairOfDatasets(SiameseHiCDataset):
 
                 original_dims, height= temp.shape, np.min(indices[0])
                 temp = resize(temp, (im_size,im_size),anti_aliasing=False,preserve_range=True)
-                features.append((feature_index, temp, original_dims, height, arr[1],pos_or_neg, qthresh, [chromosome, x1,x2, y1, y2])
+                features.append(feature_index, temp, original_dims, height, arr[1],pos_or_neg, qthresh, [chromosome, x1,x2, y1, y2])
         return features
 
     def make_maps(self,chromosome, diagonal_off=4):
