@@ -71,7 +71,7 @@ class HiCDatasetDec(HiCDataset):
         self.data, self.metadata, self.positions = tuple(self.data), frozendict(self.metadata), tuple(self.positions)
 
     def add_chromosome(self, chromosome):
-        if (chromosome in self.metadata['chromosomes'].keys()) |  (chromosome[3:] in self.metadata['chromosomes'].keys()): return print('chromosome already loaded')
+        if (chromosome in self.metadata['chromosomes'].keys())  or   (chromosome[3:] in self.metadata['chromosomes'].keys()): return print('chromosome already loaded')
         self.data, self.positions = list(self.data), list(self.positions)
         straw_file = straw.straw(self.metadata['filename'])
         self.get_chromosome(straw_file,chromosome)
@@ -89,7 +89,7 @@ class HiCDatasetDec(HiCDataset):
 
     def make_matrix(self, straw_matrix, start_pos, end_pos, chromosome):
         xpos, ypos, vals = straw_matrix.getDataFromGenomeRegion(start_pos, end_pos, start_pos, end_pos)
-        if (len(set(xpos))<self.pixel_size*0.9) |  (np.sum(np.isnan(vals)) > 0.5*len(vals)) : return None
+        if (len(set(xpos))<self.pixel_size*0.9)  or   (np.sum(np.isnan(vals)) > 0.5*len(vals)) : return None
         xpos, ypos = np.array(xpos)-start_pos/straw_matrix.binsize, np.array(ypos)-start_pos/straw_matrix.binsize
         image_scp = csr_matrix( (vals, (xpos, ypos) ), shape=(self.pixel_size,self.pixel_size) ).toarray()
         image_scp[np.isnan(image_scp)] = 0
@@ -190,7 +190,7 @@ class HiCDatasetCool(HiCDataset):
         self.data, self.metadata, self.positions = tuple(self.data), frozendict(self.metadata), tuple(self.positions)
 
     def add_chromosome(self, chromosome):
-        if (chromosome in self.metadata['chromosomes'].keys()) |  (chromosome[3:] in self.metadata['chromosomes'].keys()): return print('chromosome already loaded')
+        if (chromosome in self.metadata['chromosomes'].keys())  or   (chromosome[3:] in self.metadata['chromosomes'].keys()): return print('chromosome already loaded')
         self.data, self.positions = list(self.data), list(self.positions)
         cl_file = cooler.Cooler(self.metadata['filename'])
         self.get_chromosome(cl_file, chromosome)
@@ -207,7 +207,7 @@ class HiCDatasetCool(HiCDataset):
 
     def make_matrix(self, cl_matrix, start_pos, first):
         image_scp = cl_matrix[start_pos:start_pos+self.pixel_size, start_pos:start_pos+self.pixel_size]
-        if (sum(np.diagonal(np.isnan(image_scp)|(image_scp==0))) > self.pixel_size*0.9) : return None
+        if (sum(np.diagonal(np.isnan(image_scp) or (image_scp==0))) > self.pixel_size*0.9) : return None
         image_scp[np.isnan(image_scp)] = 0
         image_scp = image_scp/np.nanmax(image_scp)
         image_scp = np.expand_dims(image_scp, axis=0)
@@ -300,16 +300,16 @@ class PairOfDatasets(SiameseHiCDataset):
             for feature_index in np.unique(arr[0])[1:]:
                 indices=np.where(arr[0]==feature_index)
                 x1, x2, y1, y2 = min(indices[0]), max(indices[0]), min(indices[1]), (max(indices[1])
-                if ((x2-x1)<=min_length )|((y2-y1)<=min_width):
+                if ((x2-x1)<=min_length ) or ((y2-y1)<=min_width):
                     continue 
-                if ((x2-x1)>=max_length )|((y2-y1)>=max_width): 
+                if ((x2-x1)>=max_length ) or ((y2-y1)>=max_width): 
                     continue  
                 temp = convex_hull_image(arr[0]==feature_index)
                 temp = temp[x1:x2, y1:y2]
 
-                if (temp.shape[0]<=min_length )|(temp.shape[1]<=min_width): 
+                if (temp.shape[0]<=min_length ) or (temp.shape[1]<=min_width): 
                     continue
-                if (temp.shape[0]>=max_length )|(temp.shape[1]>=max_width): 
+                if (temp.shape[0]>=max_length ) or (temp.shape[1]>=max_width): 
                     continue
 
                 original_dims, height= temp.shape, np.min(indices[0])
