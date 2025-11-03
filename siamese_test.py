@@ -46,7 +46,7 @@ def test_model(model, dataloader):
 
 cuda = torch.device("cuda:0")
 model = eval("models."+ args.model_name)(mask=args.mask).to(cuda)
-model.load_state_dict(torch.load(args.model_infile))
+state_dict = torch.load(args.model_infile, weights_only=True)
 model.eval()
 
 #dataset all
