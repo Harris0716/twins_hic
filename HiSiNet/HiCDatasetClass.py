@@ -149,35 +149,26 @@ class SiameseHiCDataset(HiCDataset):
 
     def append_data(self, curr_data, pos):
 
-        print("\n=== New Siamese Pairing ===")
-        print("curr_data content:")
+        # 印前 1 筆即可
+        if len(self.data) == 0:  
+            print("\n=== Demo Siamese Pairing ===")
+            print("curr_data content:")
 
-        # curr_data[k] = (image_tensor, class_id)
-        for idx, item in enumerate(curr_data):
-            img, class_id = item
-            print(f"  idx={idx}, class_id={class_id}")
+            for idx, item in enumerate(curr_data):
+                img, class_id = item
+                print(f"  idx={idx}, class_id={class_id}")
 
-        pair_count = 0
+            temp_count = 0
+            for k in range(len(curr_data)):
+                for j in range(k + 1, len(curr_data)):
+                    img1, class1 = curr_data[k]
+                    img2, class2 = curr_data[j]
+                    pair_type = "REP" if class1 == class2 else "COND"
+                    print(f"Pair {temp_count+1}: ({class1}, {class2}) → {pair_type}")
+                    temp_count += 1
 
-        for k in range(len(curr_data)):
-            for j in range(k + 1, len(curr_data)):
+            print(f"Total pairs in first window: {temp_count}")
 
-                img1, class1 = curr_data[k]
-                img2, class2 = curr_data[j]
-
-                label = self.sims[0] if class1 == class2 else self.sims[1]
-                pair_type = "REP" if class1 == class2 else "COND"
-
-                print(f"Pair {pair_count+1}: (class {class1} , class {class2}) → {pair_type}")
-
-                # 加入 dataset
-                self.data.append((img1, img2, label))
-                self.positions.append(pos)
-                self.labels.append((k, j))
-
-                pair_count += 1
-
-        print(f"Total pairs added: {pair_count}")
 
 
 
