@@ -146,6 +146,7 @@ class SiameseHiCDataset(HiCDataset):
 
     def check_input_parameters(self, dataset): #where we check if the dataset is compatible with what we want to do
         pass
+
     def append_data(self, curr_data, pos):
 
         print("\n=== New Siamese Pairing ===")
@@ -211,26 +212,53 @@ class SiameseHiCDataset(HiCDataset):
     #             pair_count += 1
 
     #     print(f"Total pairs added at this pos: {pair_count}")
-
     def make_data(self, list_of_HiCDatasets):
-        datasets = len(list_of_HiCDatasets)
-        for chrom in self.chromsizes.keys():
-            start_index = len(self.positions)
-            starts, positions = [], []
-            for i in range(0, datasets):
-                start, end = list_of_HiCDatasets[i].metadata['chromosomes'].setdefault(chrom, (0,0))
-                starts.append(start)
-                positions.append(list(list_of_HiCDatasets[i].positions[start:end]))
-            for pos in range(0, self.chromsizes[chrom], self.split_res)[::-1]:
-                curr_data = []
-                for i in range(0,datasets):
-                    if positions[i][-1:]!=[pos]: 
-                        continue
-                    curr_data.append(list_of_HiCDatasets[i][starts[i]+len(positions[i])-1] )
-                    positions[i].pop()
-                self.append_data(curr_data, pos)
-            self.chromosomes[chrom] =(start_index,len(self.positions))
-        self.data = tuple(self.data)
+    datasets = len(list_of_HiCDatasets)
+
+    for chrom in self.chromsizes.keys():
+
+        # 取出每個 dataset 的 (start, end)
+        starts = []
+        ends = []
+        for ds in list_of_HiCDatasets:
+            start, end = ds.metadata['chromosomes'].get(chrom, (0, 0))
+            starts.append(start)
+            ends.append(end)
+
+        # 找到該染色體的「最小資料量」
+        n = min(end - start for start, end in zip(starts, ends))
+
+        # 逐 index 對齊取資料
+        for t in range(n):
+            curr_data = []
+            for d in range(datasets):
+                idx = starts[d] + t
+                img, class_id = list_of_HiCDatasets[d].data[idx]
+                curr_data.append((img, class_id))
+
+            # 呼叫 append_data() 產生 pair
+            self.append_data(curr_data, pos=t)
+
+
+    # def make_data(self, list_of_HiCDatasets):
+    #     datasets = len(list_of_HiCDatasets)
+    #     for chrom in self.chromsizes.keys():
+    #         start_index = len(self.positions)
+    #         starts, positions = [], []
+    #         for i in range(0, datasets):
+    #             start, end = list_of_HiCDatasets[i].metadata['chromosomes'].setdefault(chrom, (0,0))
+    #             starts.append(start)
+    #             positions.append(list(list_of_HiCDatasets[i].positions[start:end]))
+    #         for pos in range(0, self.chromsizes[chrom], self.split_res)[::-1]:
+    #             curr_data = []
+    #             for i in range(0,datasets):
+    #                 if positions[i][-1:]!=[pos]: 
+    #                     continue
+    #                 curr_data.append(list_of_HiCDatasets[i][starts[i]+len(positions[i])-1] )
+    #                 positions[i].pop()
+    #             self.append_data(curr_data, pos)
+    #         self.chromosomes[chrom] =(start_index,len(self.positions))
+    #     self.data = tuple(self.data)
 
 class HiCDatasetCool(HiCDataset):
     import cooler
