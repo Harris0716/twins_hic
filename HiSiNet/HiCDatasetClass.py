@@ -213,31 +213,31 @@ class SiameseHiCDataset(HiCDataset):
 
     #     print(f"Total pairs added at this pos: {pair_count}")
     def make_data(self, list_of_HiCDatasets):
-    datasets = len(list_of_HiCDatasets)
+        datasets = len(list_of_HiCDatasets)
 
-    for chrom in self.chromsizes.keys():
+        for chrom in self.chromsizes.keys():
 
-        # 取出每個 dataset 的 (start, end)
-        starts = []
-        ends = []
-        for ds in list_of_HiCDatasets:
-            start, end = ds.metadata['chromosomes'].get(chrom, (0, 0))
-            starts.append(start)
-            ends.append(end)
+            # 取出每個 dataset 的 (start, end)
+            starts = []
+            ends = []
+            for ds in list_of_HiCDatasets:
+                start, end = ds.metadata['chromosomes'].get(chrom, (0, 0))
+                starts.append(start)
+                ends.append(end)
 
-        # 找到該染色體的「最小資料量」
-        n = min(end - start for start, end in zip(starts, ends))
+            # 找到該染色體的「最小資料量」
+            n = min(end - start for start, end in zip(starts, ends))
 
-        # 逐 index 對齊取資料
-        for t in range(n):
-            curr_data = []
-            for d in range(datasets):
-                idx = starts[d] + t
-                img, class_id = list_of_HiCDatasets[d].data[idx]
-                curr_data.append((img, class_id))
+            # 逐 index 對齊取資料
+            for t in range(n):
+                curr_data = []
+                for d in range(datasets):
+                    idx = starts[d] + t
+                    img, class_id = list_of_HiCDatasets[d].data[idx]
+                    curr_data.append((img, class_id))
 
-            # 呼叫 append_data() 產生 pair
-            self.append_data(curr_data, pos=t)
+                # 呼叫 append_data() 產生 pair
+                self.append_data(curr_data, pos=t)
 
 
     # def make_data(self, list_of_HiCDatasets):
