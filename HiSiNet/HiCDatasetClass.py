@@ -146,38 +146,71 @@ class SiameseHiCDataset(HiCDataset):
 
     def check_input_parameters(self, dataset): #where we check if the dataset is compatible with what we want to do
         pass
-
     def append_data(self, curr_data, pos):
-        # debug print 
-        print(f"\n=== Position {pos} ===")
-        print("curr_data content:")
 
-        # curr_data[k] = (image_tensor, class_id)
-        for idx, item in enumerate(curr_data):
-            img, class_id = item
-            print(f"  idx={idx}, class_id={class_id}")
+    print("\n=== New Siamese Pairing ===")
+    print("curr_data content:")
+    # curr_data[k] = (img, class_id, sample_name)
 
-        pair_count = 0
+    for idx, item in enumerate(curr_data):
+        img, class_id, sample_name = item
+        print(f"  idx={idx}, name={sample_name}, class_id={class_id}")
 
-        for k in range(len(curr_data)):
-            for j in range(k + 1, len(curr_data)):
+    pair_count = 0
+    
+    # 產生所有 N choose 2 的配對
+    for k in range(len(curr_data)):
+        for j in range(k + 1, len(curr_data)):
 
-                img1, class1 = curr_data[k]
-                img2, class2 = curr_data[j]
+            img1, class1, name1 = curr_data[k]
+            img2, class2, name2 = curr_data[j]
 
-                label = self.sims[0] if class1 == class2 else self.sims[1]
-                pair_type = "REP" if class1 == class2 else "COND"
+            # sims = (replicate_label, condition_label)
+            label = self.sims[0] if class1 == class2 else self.sims[1]
+            pair_type = "REP" if class1 == class2 else "COND"
 
-                print(f"Pair {pair_count+1}: (class({class1}), class({class2}), {pair_type})")
+            print(f"Pair {pair_count+1}: {name1} vs {name2}  → {pair_type}")
 
-                # 實際加入 dataset
-                self.data.append((img1, img2, label))
-                self.positions.append(pos)
-                self.labels.append((k, j))
+            # 正式加入 pair
+            self.data.append((img1, img2, label))
+            self.labels.append((k, j))
 
-                pair_count += 1
+            pair_count += 1
 
-        print(f"Total pairs added at this pos: {pair_count}")
+    print(f"Total pairs added: {pair_count}")
+
+
+    # def append_data(self, curr_data, pos):
+    #     # debug print 
+    #     print(f"\n=== Position {pos} ===")
+    #     print("curr_data content:")
+
+    #     # curr_data[k] = (image_tensor, class_id)
+    #     for idx, item in enumerate(curr_data):
+    #         img, class_id = item
+    #         print(f"  idx={idx}, class_id={class_id}")
+
+    #     pair_count = 0
+
+    #     for k in range(len(curr_data)):
+    #         for j in range(k + 1, len(curr_data)):
+
+    #             img1, class1 = curr_data[k]
+    #             img2, class2 = curr_data[j]
+
+    #             label = self.sims[0] if class1 == class2 else self.sims[1]
+    #             pair_type = "REP" if class1 == class2 else "COND"
+
+    #             print(f"Pair {pair_count+1}: (class({class1}), class({class2}), {pair_type})")
+
+    #             # 實際加入 dataset
+    #             self.data.append((img1, img2, label))
+    #             self.positions.append(pos)
+    #             self.labels.append((k, j))
+
+    #             pair_count += 1
+
+    #     print(f"Total pairs added at this pos: {pair_count}")
 
     def make_data(self, list_of_HiCDatasets):
         datasets = len(list_of_HiCDatasets)
